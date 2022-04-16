@@ -22,56 +22,54 @@ import br.com.rafael.catalogo.components.JwtTokenEnhancer;
 @Configuration
 @EnableAuthorizationServer
 public class AuthoriztionServerConfig extends AuthorizationServerConfigurerAdapter {
-	
-	@Value("${security.oauth2.client.client-id}")
-	private String clientId;
-	
-	@Value("${security.oauth2.client.client-secret}")
-	private String clientSecret;
-	
-	@Value("${jwt.duration}")
-	private Integer jwtDuration;
-	
-	@Autowired
-	private BCryptPasswordEncoder passworderEncoder;
-	
-	@Autowired
-	private JwtAccessTokenConverter accessTokenConvertes;
-	
-	@Autowired
-	private JwtTokenStore tokenStore;
-	
-	@Autowired
-	private AuthenticationManager authenticatedManager;
-	
-	@Autowired
-	private JwtTokenEnhancer tokenEnhancer;
-	
-	
 
-	@Override
-	public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-		security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
-	}
+    @Value("${security.oauth2.client.client-id}")
+    private String clientId;
 
-	@Override
-	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-		clients.inMemory().withClient(clientId).secret(passworderEncoder.encode(clientSecret))
-		.scopes("ready" , "write")
-		.authorizedGrantTypes("password")
-		.accessTokenValiditySeconds(jwtDuration);
-	}
+    @Value("${security.oauth2.client.client-secret}")
+    private String clientSecret;
 
-	@Override
-	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-		TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain(); 
-		tokenEnhancerChain.setTokenEnhancers(Arrays.asList(accessTokenConvertes,tokenEnhancer));
-		
-		endpoints.authenticationManager(authenticatedManager).tokenStore(tokenStore).accessTokenConverter(accessTokenConvertes)
-		.tokenEnhancer(tokenEnhancerChain);
-		
-	}
-	
-	
+    @Value("${jwt.duration}")
+    private Integer jwtDuration;
+
+    @Autowired
+    private BCryptPasswordEncoder passworderEncoder;
+
+    @Autowired
+    private JwtAccessTokenConverter accessTokenConvertes;
+
+    @Autowired
+    private JwtTokenStore tokenStore;
+
+    @Autowired
+    private AuthenticationManager authenticatedManager;
+
+    @Autowired
+    private JwtTokenEnhancer tokenEnhancer;
+
+
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+        security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
+    }
+
+    @Override
+    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+        clients.inMemory().withClient(clientId).secret(passworderEncoder.encode(clientSecret))
+                .scopes("read", "trust", "write")
+                .authorizedGrantTypes("password")
+                .accessTokenValiditySeconds(jwtDuration);
+    }
+
+    @Override
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+        TokenEnhancerChain tokenEnhancerChain = new TokenEnhancerChain();
+        tokenEnhancerChain.setTokenEnhancers(Arrays.asList(accessTokenConvertes, tokenEnhancer));
+
+        endpoints.authenticationManager(authenticatedManager).tokenStore(tokenStore).accessTokenConverter(accessTokenConvertes)
+                .tokenEnhancer(tokenEnhancerChain);
+
+    }
+
 
 }
